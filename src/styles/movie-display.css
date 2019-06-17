@@ -1,0 +1,15 @@
+img {
+    text-align: center;
+}
+
+.img-responsive {
+    width: auto;
+    height: 250px;
+}
+
+.default-display {
+    color: #000;
+    margin: 200px auto;
+    text-align: center;
+    font-size: 30px;
+}
