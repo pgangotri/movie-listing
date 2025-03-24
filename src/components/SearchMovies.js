@@ -1,33 +1,30 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import '../styles/search-movie.css';
 
-class SearchMovies extends React.Component {
-  state = { value: '' };
+const SearchMovies = ({ searchTerm, onKeywordChange }) => {
+  const [value, setValue] = useState(searchTerm);
 
-  timout = null;
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      onKeywordChange(value);
+    }, 300); // Adjust debounce delay as needed
 
-  doSearch = (event) => {
-    this.setState( { value: event.target.value });
-    clearTimeout(this.timout);
+    return () => clearTimeout(timeout);
+  }, [value, onKeywordChange]);
 
-    this.timout = setTimeout(() => { this.props.onKeywordChange(this.state.value) }, 50);
-  };
-
-  render() {
-    return (
-      <div className="row mt-2 mb-2">
-        <div className="col-12">
-          <input
-            className="form-control"
-            type="text"
-            value={this.props.searchTerm}
-            placeholder="Search Movies, TV Shows, Web Series..."
-            onChange={ this.doSearch }
-          />
-        </div>
+  return (
+    <div className="row mt-2 mb-2">
+      <div className="col-12">
+        <input
+          className="form-control"
+          type="text"
+          value={value}
+          placeholder="Search Movies, TV Shows, Web Series..."
+          onChange={(e) => setValue(e.target.value)}
+        />
       </div>
-    );
-  }
-}
+    </div>
+  );
+};
 
 export default SearchMovies;

@@ -1,65 +1,57 @@
-import React from 'react';
-import _ from 'lodash';
+import React, { useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 
 import '../styles/movie-display.css';
-
 import movieIcon from '../assets/no-poster-available.jpg';
 
-class DisplayMovies extends React.Component {
-
-  componentDidMount() {
-    window.addEventListener('scroll', (e) => this.handleScroll(e));
-  };
-
-  componentWillUnmount() {
-    window.removeEventListener('scroll', this.handleScroll);
-  };
-
-  handleScroll = (e) => {
-    const element = e.target.scrollingElement;
+const DisplayMovies = ({ movies, defaultMessage, handlePagination }) => {
+  
+  // Scroll event handler
+  const handleScroll = useCallback(() => {
+    const element = document.documentElement;
     if (element.scrollHeight - element.scrollTop === element.clientHeight) {
-      this.props.handlePagination();
+      handlePagination();
     }
-  };
+  }, [handlePagination]);
 
-  addDefaultSrc = (e) => {
+  // Attach event listener on mount and cleanup on unmount
+  useEffect(() => {
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [handleScroll]);
+
+  // Fallback image handler
+  const addDefaultSrc = (e) => {
     e.target.onerror = null;
     e.target.src = movieIcon;
   };
 
-  renderMovieList = () => {
-    return this.props.movies.map((movie, i) => {
-      return (
-        <div className="col-md-2 mb-3" key={i} >
-          <Link to={`/${movie.imdbID}`} style={{"textDecoration": "none", "color": "black"}}>
-            <div className="card card-body text-center h-100">
-              <img
-                className="w-100 mb-2 img-responsive"
-                src={movie.Poster}
-                onError={ this.addDefaultSrc }
-                alt="No Poster"
-              />
-              <div className="card-title">
-                {`${_.truncate(movie.Title, "25")} - ${movie.Year}`}
-              </div>
+  // Render movie cards
+  const renderMovieList = () => {
+    return movies.map((movie, i) => (
+      <div className="col-md-2 mb-3" key={i}>
+        <Link to={`/${movie.imdbID}`} style={{ textDecoration: "none", color: "black" }}>
+          <div className="card card-body text-center h-100">
+            <img
+              className="w-100 mb-2 img-responsive"
+              src={movie.Poster}
+              onError={addDefaultSrc}
+              alt="No Poster"
+            />
+            <div className="card-title">
+              {`${movie.Title.length > 25 ? movie.Title.slice(0, 25) + "..." : movie.Title} - ${movie.Year}`}
             </div>
-          </Link>
-        </div>
-      )
-    })
+          </div>
+        </Link>
+      </div>
+    ));
   };
 
-  render() {
-    if(!this.props.movies.length) {
-      return <div className="default-display">{this.props.defaultMessage}</div>;
-    }
-    return (
-      <div className="row">
-        {this.renderMovieList()}
-      </div>
-    )
-  }
-}
+  return movies.length ? (
+    <div className="row">{renderMovieList()}</div>
+  ) : (
+    <div className="default-display">{defaultMessage}</div>
+  );
+};
 
 export default DisplayMovies;
